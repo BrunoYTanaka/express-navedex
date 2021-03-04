@@ -4,7 +4,8 @@ const projectsServices = new ProjectsServices()
 
 class ProjectsController {
   async index(req, res) {
-    const { userId, name } = req.query
+    const { userId } = req
+    const { name } = req.query
 
     const projects = await projectsServices.listProjects(userId, {
       name,
@@ -14,7 +15,7 @@ class ProjectsController {
   }
 
   async store(req, res) {
-    const { userId } = req.query
+    const { userId } = req
     const { name, navers } = req.body
     const projects = await projectsServices.createProject(userId, {
       name,
@@ -33,7 +34,7 @@ class ProjectsController {
   }
 
   async delete(req, res) {
-    const { userId } = req.query
+    const { userId } = req
     const { projectId } = req.params
 
     await projectsServices.deleteProject(userId, projectId)
@@ -42,7 +43,7 @@ class ProjectsController {
   }
 
   async update(req, res) {
-    const { userId } = req.query
+    const { userId } = req
     const { projectId } = req.params
     const { name, navers } = req.body
 
