@@ -8,5 +8,6 @@ const routes = Router()
 routes.get('/list', naversController.index)
 routes.get('/:naverId', naversController.show)
 routes.post('/', naversController.store)
+routes.delete('/:naverId', naversController.delete)
 
 export default routes

@@ -4,9 +4,13 @@ const naversServices = new NaversServices()
 
 class NaversController {
   async index(req, res) {
-    const { userId, name, job_role } = req.query
+    const { userId, name, job_role, company_time } = req.query
 
-    const navers = await naversServices.listNavers(userId, { name, job_role })
+    const navers = await naversServices.listNavers(userId, {
+      name,
+      job_role,
+      company_time,
+    })
 
     return res.json(navers)
   }
@@ -30,9 +34,18 @@ class NaversController {
   async show(req, res) {
     const { naverId } = req.params
 
-    const navers = await naversServices.showNaverById(naverId)
+    const naver = await naversServices.showNaverById(naverId)
 
-    return res.json(navers)
+    return res.json(naver)
+  }
+
+  async delete(req, res) {
+    const { userId } = req.query
+    const { naverId } = req.params
+
+    await naversServices.deleteNaver(userId, naverId)
+
+    return res.status(204).json()
   }
 }
 
