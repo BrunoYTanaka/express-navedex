@@ -40,6 +40,20 @@ class ProjectsController {
 
     return res.status(204).json()
   }
+
+  async update(req, res) {
+    const { userId } = req.query
+    const { projectId } = req.params
+    const { name, navers } = req.body
+
+    const project = await projectsServices.updateProject(userId, {
+      projectId,
+      name,
+      navers,
+    })
+
+    return res.json(project)
+  }
 }
 
 export default ProjectsController

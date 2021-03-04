@@ -85,6 +85,65 @@ class ProjectsServices {
       })
       .del()
   }
+
+  async updateProject(userId, project) {
+    const trx = await connection.transaction()
+    try {
+      const { projectId, name, navers } = project
+
+      // update project name
+      const projectUpdated = await trx('projects')
+        .where({
+          id: projectId,
+          userId,
+        })
+        .update({
+          name,
+        })
+
+      console.log(projectUpdated)
+
+      // clear navers_projects with projectId
+      await trx('navers_projects').where('projectId', projectId).del()
+
+      if (!navers || !navers.length) {
+        trx.commit()
+        return {
+          id: projectId,
+          name,
+        }
+      }
+
+      const addedIds = []
+      const promises = navers.map(async naverId => {
+        // verify if naver exists
+        const [naver] = await trx('navers').where({
+          id: naverId,
+          userId,
+        })
+        if (!naver) return null
+        addedIds.push(naver)
+        // add to navers_projects
+        return trx('navers_projects').insert({
+          naverId,
+          projectId,
+        })
+      })
+
+      await Promise.all(promises)
+
+      trx.commit()
+
+      return {
+        id: projectId,
+        name,
+        navers: [...addedIds],
+      }
+    } catch (error) {
+      trx.rollback()
+      return null
+    }
+  }
 }
 
 export default ProjectsServices

@@ -47,6 +47,26 @@ class NaversController {
 
     return res.status(204).json()
   }
+
+  async update(req, res) {
+    const { userId } = req.query
+    const { naverId } = req.params
+    const { name, birthdate, admission_date, job_role, projects } = req.body
+
+    try {
+      const naver = await naversServices.updateNaver(userId, {
+        naverId,
+        name,
+        birthdate,
+        admission_date,
+        job_role,
+        projects,
+      })
+      return res.json(naver)
+    } catch (error) {
+      return res.json(error)
+    }
+  }
 }
 
 export default NaversController

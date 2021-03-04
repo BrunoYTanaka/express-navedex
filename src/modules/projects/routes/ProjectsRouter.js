@@ -9,5 +9,6 @@ routes.get('/list', projectsController.index)
 routes.get('/:projectId', projectsController.show)
 routes.post('/', projectsController.store)
 routes.delete('/:projectId', projectsController.delete)
+routes.put('/:projectId', projectsController.update)
 
 export default routes

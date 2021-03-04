@@ -119,6 +119,84 @@ class NaversService {
       })
       .del()
   }
+
+  async updateNaver(userId, naver) {
+    const trx = await connection.transaction()
+
+    try {
+      const {
+        naverId,
+        name,
+        birthdate,
+        admission_date,
+        job_role,
+        projects,
+      } = naver
+
+      const [hasNaver] = await trx('navers').where({
+        id: naverId,
+        userId,
+      })
+
+      if (!hasNaver) {
+        throw new Error('Error update naver')
+      }
+
+      const updatedNaver = await trx('navers')
+        .where({
+          id: naverId,
+          userId,
+        })
+        .update({
+          name,
+          birthdate,
+          admission_date,
+          job_role,
+        })
+
+      if (!updatedNaver || !projects || !projects.length) {
+        trx.commit()
+        return {
+          id: naverId,
+          name,
+          userId,
+          birthdate,
+          admission_date,
+          job_role,
+        }
+      }
+
+      await trx('navers_projects').where('id', 'naverId').del()
+
+      const addedIds = []
+      const promises = projects.map(async projectId => {
+        const [project] = await trx('projects').where('id', projectId)
+        if (!project) return null
+        addedIds.push(project)
+        return trx('navers_projects').insert({
+          naverId,
+          projectId,
+        })
+      })
+
+      await Promise.all(promises)
+
+      trx.commit()
+
+      return {
+        id: naverId,
+        name,
+        userId,
+        birthdate,
+        admission_date,
+        job_role,
+        projects: [...addedIds],
+      }
+    } catch (error) {
+      trx.rollback()
+      return error
+    }
+  }
 }
 
 export default NaversService
