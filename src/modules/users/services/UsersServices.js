@@ -1,4 +1,7 @@
 import bcrypt from 'bcryptjs'
+import nodemailer from 'nodemailer'
+import path from 'path'
+import Mailer from '../../../lib/mail'
 import connection from '../../../database/connection'
 import AppError from '../../../error/AppError'
 
@@ -18,7 +21,17 @@ class UsersService {
       email,
       password: password_hash,
     })
-    return id
+
+    await Mailer.sendMail({
+      to: email,
+      subject: '[TeamNave] Conta criada',
+      template: 'userCreatedTemplate',
+    })
+
+    return {
+      id,
+      email,
+    }
   }
 }
 

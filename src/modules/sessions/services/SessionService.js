@@ -21,7 +21,10 @@ class SessionService {
     }
 
     return {
-      user,
+      user: {
+        id: user.id,
+        email: user.email,
+      },
       token: jwt.sign({ id: user.id }, auth.secret, {
         expiresIn: auth.expiresIn,
       }),

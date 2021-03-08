@@ -6,12 +6,9 @@ class UserController {
   async store(req, res) {
     const { email, password } = req.body
 
-    const id = await userService.createUser({ email, password })
+    const user = await userService.createUser({ email, password })
 
-    return res.json({
-      id,
-      email,
-    })
+    return res.json(user)
   }
 }
 
