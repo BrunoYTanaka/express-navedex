@@ -67,7 +67,7 @@ class NaversController {
       throw new AppError('Naver not founded!', 404)
     }
 
-    const naverUpdated = naversServices.updateNaver(userId, {
+    const naverUpdated = await naversServices.updateNaver(userId, {
       naverId,
       name,
       birthdate,
@@ -75,7 +75,6 @@ class NaversController {
       job_role,
       projects,
     })
-
     return res.json(naverUpdated)
   }
 }

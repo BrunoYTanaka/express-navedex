@@ -123,15 +123,17 @@ class ProjectsServices {
     const { projectId, name, navers } = data
 
     const trx = await connection.transaction()
-    await trx('projects')
-      .where({
-        id: projectId,
-        userId,
-      })
-      .update({
-        name,
-      })
 
+    if (name) {
+      await trx('projects')
+        .where({
+          id: projectId,
+          userId,
+        })
+        .update({
+          name,
+        })
+    }
     await trx('navers_projects').where('projectId', projectId).del()
 
     if (!navers || !navers.length) {
@@ -142,25 +144,40 @@ class ProjectsServices {
       }
     }
 
-    const addedIds = []
+    const checkIfEachNaverExists = navers.map(async naverId => {
+      const [naver] = await trx('navers').where('id', naverId)
+      if (!naver) {
+        return naverId
+      }
+      return null
+    })
+
+    const naversDoestNotExists = (
+      await Promise.all(checkIfEachNaverExists)
+    ).filter(Boolean)
+
+    if (naversDoestNotExists.length) {
+      trx.rollback()
+      throw new AppError(
+        `The following navers does no exists: ${naversDoestNotExists.join(
+          ', ',
+        )}`,
+      )
+    }
+
     const promises = navers.map(async naverId => {
-      const [naver] = await trx('navers').where('id', 'naverId')
-      if (!naver) return null
-      addedIds.push(naver)
       return trx('navers_projects').insert({
         naverId,
         projectId,
       })
     })
 
-    await Promise.all(promises)
-
-    trx.commit()
+    Promise.all(promises).then(trx.commit).catch(trx.rollback)
 
     return {
       id: projectId,
       name,
-      navers: [...addedIds],
+      navers,
     }
   }
 }

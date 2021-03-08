@@ -25,7 +25,7 @@ class NaversService {
     })
 
     if (!projects || !projects.length) {
-      trx.commit()
+      await trx.commit()
       return {
         id,
         name,
@@ -78,6 +78,12 @@ class NaversService {
   }
 
   async showNaverById(naverId) {
+    const [hasNaver] = await connection('navers').where('id', naverId)
+
+    if (!hasNaver) {
+      throw new AppError('Naver not founded!', 404)
+    }
+
     const navers = connection
       .select([
         'navers.id as id',
@@ -89,7 +95,6 @@ class NaversService {
         'projects.id as projectId',
       ])
       .table('navers')
-      .where('navers.id', naverId)
       .leftJoin('navers_projects', 'navers.id', '=', 'navers_projects.naverId')
       .leftJoin('projects', 'navers_projects.projectId', '=', 'projects.id')
       .then(res => {
@@ -116,7 +121,7 @@ class NaversService {
 
   async listNavers(userId, filters) {
     const { name, job_role, company_time } = filters
-    const navers = this.navers
+    const navers = connection('navers')
       .where('userId', userId)
       .where(query => {
         if (name) {
@@ -160,8 +165,9 @@ class NaversService {
       projects,
     } = data
 
-    const trx = await connection.transaction()
-    const updatedNaver = await trx('navers')
+    let trx = await connection.transaction()
+
+    trx('navers')
       .where({
         id: naverId,
         userId,
@@ -172,9 +178,17 @@ class NaversService {
         admission_date,
         job_role,
       })
+      .then(async () => {
+        trx('navers_projects')
+          .where('naverId', naverId)
+          .del()
+          .then(trx.commit)
+          .catch(trx.rollback)
+      })
+      .then(trx.commit)
+      .catch(trx.rollback)
 
-    if (!updatedNaver || !projects || !projects.length) {
-      trx.commit()
+    if (!projects || !projects.length) {
       return {
         id: naverId,
         name,
@@ -185,22 +199,36 @@ class NaversService {
       }
     }
 
-    await trx('navers_projects').where('id', 'naverId').del()
-
-    const addedIds = []
-    const promises = projects.map(async projectId => {
+    const checkIfEachProjectExists = projects.map(async projectId => {
       const [project] = await trx('projects').where('id', projectId)
-      if (!project) return null
-      addedIds.push(project)
+      if (!project) {
+        return projectId
+      }
+      return null
+    })
+
+    const projectsDoestNotExists = (
+      await Promise.all(checkIfEachProjectExists)
+    ).filter(Boolean)
+    if (projectsDoestNotExists.length) {
+      await trx.rollback()
+      throw new AppError(
+        `The following navers does no exists: ${projectsDoestNotExists.join(
+          ', ',
+        )}`,
+      )
+    }
+
+    trx = await connection.transaction()
+
+    const promises = projects.map(async projectId => {
       return trx('navers_projects').insert({
         naverId,
         projectId,
       })
     })
 
-    await Promise.all(promises)
-
-    trx.commit()
+    Promise.all(promises).then(trx.commit).catch(trx.rollback)
 
     return {
       id: naverId,
@@ -209,7 +237,7 @@ class NaversService {
       birthdate,
       admission_date,
       job_role,
-      projects: [...addedIds],
+      projects,
     }
   }
 }
