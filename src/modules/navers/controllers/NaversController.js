@@ -1,3 +1,4 @@
+import AppError from '../../../error/AppError'
 import NaversServices from '../services/NaversServices'
 
 const naversServices = new NaversServices()
@@ -44,6 +45,12 @@ class NaversController {
     const { userId } = req
     const { naverId } = req.params
 
+    const naver = await naversServices.findNaverById(userId, naverId)
+
+    if (!naver) {
+      throw new AppError('Naver not founded!', 404)
+    }
+
     await naversServices.deleteNaver(userId, naverId)
 
     return res.status(204).json()
@@ -54,7 +61,13 @@ class NaversController {
     const { naverId } = req.params
     const { name, birthdate, admission_date, job_role, projects } = req.body
 
-    const naver = naversServices.updateNaver(userId, {
+    const naver = await naversServices.findNaverById(userId, naverId)
+
+    if (!naver) {
+      throw new AppError('Naver not founded!', 404)
+    }
+
+    const naverUpdated = naversServices.updateNaver(userId, {
       naverId,
       name,
       birthdate,
@@ -63,7 +76,7 @@ class NaversController {
       projects,
     })
 
-    return res.json(naver)
+    return res.json(naverUpdated)
   }
 }
 

@@ -2,24 +2,56 @@ import connection from '../../../database/connection'
 import AppError from '../../../error/AppError'
 
 class ProjectsServices {
+  async findProjectById(userId, projectId) {
+    const [project] = await connection('projects').where({
+      id: projectId,
+      userId,
+    })
+    return project
+  }
+
   async createProject(userId, { name, navers }) {
-    const [id] = await connection('projects').insert({
+    const trx = await connection.transaction()
+
+    const [id] = await trx('projects').insert({
       name,
       userId,
     })
 
     if (!navers || !navers.length) {
+      trx.commit()
       return { id, name }
     }
 
-    const promises = navers.map(naverId => {
-      return connection('navers_projects').insert({
+    const checkIfEachNaverExists = navers.map(async naverId => {
+      const [naver] = await trx('navers').where('id', naverId)
+      if (!naver) {
+        return naverId
+      }
+      return null
+    })
+
+    const naversDoestNotExists = (
+      await Promise.all(checkIfEachNaverExists)
+    ).filter(Boolean)
+
+    if (naversDoestNotExists.length) {
+      trx.rollback()
+      throw new AppError(
+        `The following navers does no exists: ${naversDoestNotExists.join(
+          ', ',
+        )}`,
+      )
+    }
+
+    const promises = navers.map(async naverId => {
+      return trx('navers_projects').insert({
         naverId,
         projectId: id,
       })
     })
 
-    await Promise.all(promises)
+    Promise.all(promises).then(trx.commit).catch(trx.rollback)
 
     return { id, name, navers }
   }
@@ -79,15 +111,7 @@ class ProjectsServices {
   }
 
   async deleteProject(userId, projectId) {
-    const [project] = await connection('projects').where({
-      id: projectId,
-      userId,
-    })
-    if (!project) {
-      throw new AppError('Project not founded!', 404)
-    }
-
-    await connection('navers_projects')
+    return connection('projects')
       .where({
         id: projectId,
         userId,
@@ -97,15 +121,6 @@ class ProjectsServices {
 
   async updateProject(userId, data) {
     const { projectId, name, navers } = data
-
-    const [project] = await connection('projects').where({
-      id: projectId,
-      userId,
-    })
-
-    if (!project) {
-      throw new AppError('Project not founded!', 404)
-    }
 
     const trx = await connection.transaction()
     await trx('projects')

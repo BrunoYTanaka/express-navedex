@@ -3,16 +3,20 @@ import connection from '../../../database/connection'
 import AppError from '../../../error/AppError'
 
 class NaversService {
-  constructor() {
-    this.navers = connection('navers')
-    this.projects = connection('projects')
-    this.navers_projects = connection('navers_projects')
+  async findNaverById(userId, naverId) {
+    const [naver] = await connection('navers').where({
+      id: naverId,
+      userId,
+    })
+    return naver
   }
 
   async createNaver(userId, naver) {
     const { name, birthdate, admission_date, job_role, projects } = naver
 
-    const [id] = await this.navers.insert({
+    const trx = await connection.transaction()
+
+    const [id] = await trx('navers').insert({
       userId,
       name,
       birthdate,
@@ -21,6 +25,7 @@ class NaversService {
     })
 
     if (!projects || !projects.length) {
+      trx.commit()
       return {
         id,
         name,
@@ -30,18 +35,36 @@ class NaversService {
         job_role,
       }
     }
-    const addedIds = []
+
+    const checkIfEachProjectExists = projects.map(async projectId => {
+      const [project] = await trx('projects').where('id', projectId)
+      if (!project) {
+        return projectId
+      }
+      return null
+    })
+
+    const projectsDoestNotExists = (
+      await Promise.all(checkIfEachProjectExists)
+    ).filter(Boolean)
+
+    if (projectsDoestNotExists.length) {
+      trx.rollback()
+      throw new AppError(
+        `The following navers does no exists: ${projectsDoestNotExists.join(
+          ', ',
+        )}`,
+      )
+    }
+
     const promises = projects.map(async projectId => {
-      const [project] = await this.projects.where('id', projectId)
-      if (!project) return null
-      addedIds.push(project)
-      return this.navers_projects.insert({
+      return trx('navers_projects').insert({
         naverId: id,
         projectId,
       })
     })
 
-    await Promise.all(promises)
+    Promise.all(promises).then(trx.commit).catch(trx.rollback)
 
     return {
       id,
@@ -50,7 +73,7 @@ class NaversService {
       birthdate,
       admission_date,
       job_role,
-      projects: [...addedIds],
+      projects,
     }
   }
 
@@ -119,16 +142,7 @@ class NaversService {
   }
 
   async deleteNaver(userId, naverId) {
-    const [naver] = await this.navers.where({
-      id: naverId,
-      userId,
-    })
-
-    if (!naver) {
-      throw new AppError('Naver not founded!', 404)
-    }
-
-    await this.navers
+    return connection('navers')
       .where({
         id: naverId,
         userId,
@@ -145,15 +159,6 @@ class NaversService {
       job_role,
       projects,
     } = data
-
-    const [naver] = await this.navers.where({
-      id: naverId,
-      userId,
-    })
-
-    if (!naver) {
-      throw new AppError('Naver not founded!', 404)
-    }
 
     const trx = await connection.transaction()
     const updatedNaver = await trx('navers')

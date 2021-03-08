@@ -1,3 +1,4 @@
+import AppError from '../../../error/AppError'
 import ProjectsServices from '../services/ProjectsServices'
 
 const projectsServices = new ProjectsServices()
@@ -37,6 +38,12 @@ class ProjectsController {
     const { userId } = req
     const { projectId } = req.params
 
+    const project = await projectsServices.findProjectById(userId, projectId)
+
+    if (!project) {
+      throw new AppError('Project not founded!', 404)
+    }
+
     await projectsServices.deleteProject(userId, projectId)
 
     return res.status(204).json()
@@ -47,13 +54,19 @@ class ProjectsController {
     const { projectId } = req.params
     const { name, navers } = req.body
 
-    const project = await projectsServices.updateProject(userId, {
+    const project = await projectsServices.findProjectById(userId, projectId)
+
+    if (!project) {
+      throw new AppError('Project not founded!', 404)
+    }
+
+    const projectUpdated = await projectsServices.updateProject(userId, {
       projectId,
       name,
       navers,
     })
 
-    return res.json(project)
+    return res.json(projectUpdated)
   }
 }
 

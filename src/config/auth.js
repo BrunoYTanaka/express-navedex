@@ -1,4 +1,4 @@
 export default {
   secret: 'secret',
-  expiresIn: '7d',
+  expiresIn: '1d',
 }
