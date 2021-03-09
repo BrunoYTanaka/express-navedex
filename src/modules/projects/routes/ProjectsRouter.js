@@ -32,7 +32,7 @@ routes.post(
   celebrate({
     [Segments.BODY]: {
       name: Joi.string().required(),
-      navers: Joi.array().items(Joi.number),
+      navers: Joi.array().items(Joi.number()),
     },
   }),
   projectsController.store,
@@ -56,7 +56,7 @@ routes.put(
     },
     [Segments.BODY]: {
       name: Joi.string().required(),
-      navers: Joi.array().items(Joi.number),
+      navers: Joi.array().items(Joi.number()),
     },
   }),
   projectsController.update,

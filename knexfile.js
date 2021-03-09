@@ -9,6 +9,8 @@ module.exports = {
     },
     useNullAsDefault: true,
     pool:{
+      min: 0,
+      max:7,
       afterCreate: (conn, cb) =>{
         conn.run('PRAGMA foreign_keys = ON', cb);
       }

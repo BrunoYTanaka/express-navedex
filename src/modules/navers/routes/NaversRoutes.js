@@ -12,7 +12,7 @@ routes.get(
   celebrate({
     [Segments.QUERY]: {
       name: Joi.string(),
-      admission_date: Joi.string(),
+      job_role: Joi.string(),
       company_time: Joi.number(),
     },
   }),
@@ -58,6 +58,13 @@ routes.put(
   celebrate({
     [Segments.PARAMS]: {
       naverId: Joi.number().required(),
+    },
+    [Segments.BODY]: {
+      name: Joi.string().required(),
+      birthdate: Joi.string().required(),
+      admission_date: Joi.string().required(),
+      job_role: Joi.string().required(),
+      projects: Joi.array().items(Joi.number()),
     },
   }),
   naversController.update,

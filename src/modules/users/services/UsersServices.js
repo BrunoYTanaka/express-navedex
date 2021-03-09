@@ -1,20 +1,16 @@
 import bcrypt from 'bcryptjs'
-import nodemailer from 'nodemailer'
-import path from 'path'
 import Mailer from '../../../lib/mail'
 import connection from '../../../database/connection'
-import AppError from '../../../error/AppError'
 
 class UsersService {
-  async createUser({ email, password }) {
+  async findUserByEmail(email) {
     const [user] = await connection('users').where({
       email,
     })
+    return user
+  }
 
-    if (user) {
-      throw new AppError('Email already used!')
-    }
-
+  async createUser({ email, password }) {
     const password_hash = bcrypt.hashSync(password, 10)
 
     const [id] = await connection('users').insert({

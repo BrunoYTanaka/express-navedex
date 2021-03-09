@@ -1,4 +1,4 @@
-import { differenceInCalendarDays } from 'date-fns'
+import { differenceInCalendarYears } from 'date-fns'
 import connection from '../../../database/connection'
 import AppError from '../../../error/AppError'
 
@@ -29,7 +29,6 @@ class NaversService {
       return {
         id,
         name,
-        userId,
         birthdate,
         admission_date,
         job_role,
@@ -51,7 +50,7 @@ class NaversService {
     if (projectsDoestNotExists.length) {
       trx.rollback()
       throw new AppError(
-        `The following navers does no exists: ${projectsDoestNotExists.join(
+        `The following projects does not exists: ${projectsDoestNotExists.join(
           ', ',
         )}`,
       )
@@ -69,7 +68,6 @@ class NaversService {
     return {
       id,
       name,
-      userId,
       birthdate,
       admission_date,
       job_role,
@@ -136,8 +134,8 @@ class NaversService {
           return res.filter(naver => {
             const today = new Date()
             const start = new Date(naver.admission_date)
-            const companyTimeTotal = differenceInCalendarDays(today, start)
-            return companyTimeTotal <= company_time
+            const companyTimeTotal = differenceInCalendarYears(today, start)
+            return companyTimeTotal >= company_time
           })
         }
         return res
@@ -192,7 +190,6 @@ class NaversService {
       return {
         id: naverId,
         name,
-        userId,
         birthdate,
         admission_date,
         job_role,
@@ -213,7 +210,7 @@ class NaversService {
     if (projectsDoestNotExists.length) {
       await trx.rollback()
       throw new AppError(
-        `The following navers does no exists: ${projectsDoestNotExists.join(
+        `The following projects does not exists: ${projectsDoestNotExists.join(
           ', ',
         )}`,
       )
@@ -233,7 +230,6 @@ class NaversService {
     return {
       id: naverId,
       name,
-      userId,
       birthdate,
       admission_date,
       job_role,

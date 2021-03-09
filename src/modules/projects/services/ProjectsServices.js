@@ -38,7 +38,7 @@ class ProjectsServices {
     if (naversDoestNotExists.length) {
       trx.rollback()
       throw new AppError(
-        `The following navers does no exists: ${naversDoestNotExists.join(
+        `The following navers does not exists: ${naversDoestNotExists.join(
           ', ',
         )}`,
       )
@@ -57,6 +57,12 @@ class ProjectsServices {
   }
 
   async showProjectById(projectId) {
+    const [hasProject] = await connection('projects').where('id', projectId)
+
+    if (!hasProject) {
+      throw new AppError('Project not founded!', 404)
+    }
+
     const projects = connection
       .select([
         'projects.id as id',
@@ -159,7 +165,7 @@ class ProjectsServices {
     if (naversDoestNotExists.length) {
       trx.rollback()
       throw new AppError(
-        `The following navers does no exists: ${naversDoestNotExists.join(
+        `The following navers does not exists: ${naversDoestNotExists.join(
           ', ',
         )}`,
       )
