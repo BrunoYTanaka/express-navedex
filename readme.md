@@ -37,21 +37,32 @@
 
 | Name                                                     | Description                                                            |
 | -------------------------------------------------------- | ---------------------------------------------------------------------- |
-| [NextJS](https://nextjs.org/)                            | The React Framework for Production.                                    |
-| [NextAuth](https://next-auth.js.org/)                    | Authentication for Next.js.                                            |
-| [ReactJS](https://reactjs.org/)                          | A JavaScript library for building user interfaces.                     |
-| [Axios](https://redux.js.org/)                           | A Predictable State Container for JS Apps.                             |
-| [Styled Components](https://styled-components.com/)      | Visual primitives for the component age.                               |
+| [Express](https://github.com/expressjs/express)          | Fast, unopinionated, minimalist web framework for node                 |
+| [KnexJS](http://knexjs.org/)                             | A SQL Query Builder for Javascript
+| [Nodemon](https://nodemon.io/)|Nodemon is a tool that helps develop node.js based applications by   automatically restarting the node application when file changes in the directory are detected.                                      |
+| [Jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)| An implementation of JSON Web Tokens.                                 |
+| [Nodemailer](https://nodemailer.com/)                    | A module for Node.js applications to allow easy as cake email sending. |
+| [Jest](https://jestjs.io/)                               | A delightful JavaScript Testing Framework with a focus on simplicity.  |
 
 ## 4. Installation & Set Up
 
-1. Install project dependencies
+1. Clone this repository
 
 ```bash
-  yarn install or npm install
+  git clone https://github.com/BrunoYTanaka/navedex-api.git
 ```
 
-2. Start the development server
+2. Enter the repository folder and install the dependencies
+
+```bash
+   yarn install or npm install
+```
+3. Run migrations
+
+```bash
+  yarn migration:run or npm run migration:run
+```
+4. Start application on port 3000
 
 ```bash
   yarn dev or npm run dev
