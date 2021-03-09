@@ -7,8 +7,7 @@
     "dev": "nodemon src/server.js",
     "migration:create": "knex migrate:make",
     "migration:run": "knex migrate:latest",
-    "test": "jest --runInBand --detectOpenHandles",
-    "test:coverage": "jest --runInBand --detectOpenHandles --coverage --no-cache"
+    "test": "jest --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
