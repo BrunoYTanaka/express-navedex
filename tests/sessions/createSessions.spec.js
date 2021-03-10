@@ -10,7 +10,7 @@ const user = {
   password: '1234',
 }
 
-describe('Create SESSION', () => {
+describe('Create Session', () => {
   beforeAll(async () => {
     await connection.migrate.rollback()
     await connection.migrate.latest()

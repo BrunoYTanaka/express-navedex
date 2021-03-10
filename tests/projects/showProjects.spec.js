@@ -2,7 +2,6 @@ import request from 'supertest'
 import connection from '../../src/database/connection'
 import app from '../../src/app'
 import AppError from '../../src/error/AppError'
-import ProjectsController from '../../src/modules/projects/controllers/ProjectsController'
 
 jest.mock('../../src/lib/mail')
 

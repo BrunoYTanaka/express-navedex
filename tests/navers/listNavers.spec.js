@@ -1,7 +1,6 @@
 import request from 'supertest'
 import connection from '../../src/database/connection'
 import app from '../../src/app'
-import AppError from '../../src/error/AppError'
 
 jest.mock('../../src/lib/mail')
 
@@ -33,7 +32,7 @@ const navers = [
 
 let token = ''
 
-describe('List Naver', () => {
+describe('List Navers', () => {
   beforeAll(async () => {
     await connection.migrate.rollback()
     await connection.migrate.latest()

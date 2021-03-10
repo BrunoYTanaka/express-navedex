@@ -37,8 +37,8 @@
 
 | Name                                                     | Description                                                            |
 | -------------------------------------------------------- | ---------------------------------------------------------------------- |
-| [Express](https://github.com/expressjs/express)          | Fast, unopinionated, minimalist web framework for node                 |
-| [KnexJS](http://knexjs.org/)                             | A SQL Query Builder for Javascript
+| [Express](https://github.com/expressjs/express)          | Fast, unopinionated, minimalist web framework for node.                |
+| [KnexJS](http://knexjs.org/)                             | A SQL Query Builder for Javascript.
 | [Nodemon](https://nodemon.io/)|Nodemon is a tool that helps develop node.js based applications by   automatically restarting the node application when file changes in the directory are detected.                                      |
 | [Jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)| An implementation of JSON Web Tokens.                                 |
 | [Nodemailer](https://nodemailer.com/)                    | A module for Node.js applications to allow easy as cake email sending. |

@@ -17,6 +17,7 @@ app.use((err, _req, res, _next) => {
       message: err.message,
     })
   }
+  // eslint-disable-next-line no-console
   console.error(err)
   return res.status(500).json({
     status: 'error',

@@ -5,7 +5,7 @@ import AppError from '../../src/error/AppError'
 
 jest.mock('../../src/lib/mail')
 
-describe('Create USER', () => {
+describe('Create User', () => {
   beforeAll(async () => {
     await connection.migrate.rollback()
     await connection.migrate.latest()

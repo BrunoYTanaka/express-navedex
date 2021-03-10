@@ -46,8 +46,10 @@ class Email {
       subject,
       template,
     })
+    /* eslint-disable no-console */
     console.log('Message sent: %s', message.messageId)
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(message))
+    /* eslint-disable no-console */
   }
 }
 

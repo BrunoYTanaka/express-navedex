@@ -93,6 +93,7 @@ class NaversService {
         'projects.id as projectId',
       ])
       .table('navers')
+      .where('navers.id', naverId)
       .leftJoin('navers_projects', 'navers.id', '=', 'navers_projects.naverId')
       .leftJoin('projects', 'navers_projects.projectId', '=', 'projects.id')
       .then(res => {
@@ -121,6 +122,7 @@ class NaversService {
     const { name, job_role, company_time } = filters
     const navers = connection('navers')
       .where('userId', userId)
+      .select('id', 'name', 'birthdate', 'admission_date', 'job_role')
       .where(query => {
         if (name) {
           query.where('name', 'like', `%${name}%`)
@@ -163,9 +165,9 @@ class NaversService {
       projects,
     } = data
 
-    let trx = await connection.transaction()
+    const trx = await connection.transaction()
 
-    trx('navers')
+    await trx('navers')
       .where({
         id: naverId,
         userId,
@@ -176,17 +178,11 @@ class NaversService {
         admission_date,
         job_role,
       })
-      .then(async () => {
-        trx('navers_projects')
-          .where('naverId', naverId)
-          .del()
-          .then(trx.commit)
-          .catch(trx.rollback)
-      })
-      .then(trx.commit)
-      .catch(trx.rollback)
+
+    await trx('navers_projects').where('naverId', naverId).del()
 
     if (!projects || !projects.length) {
+      await trx.commit()
       return {
         id: naverId,
         name,
@@ -215,8 +211,6 @@ class NaversService {
         )}`,
       )
     }
-
-    trx = await connection.transaction()
 
     const promises = projects.map(async projectId => {
       return trx('navers_projects').insert({

@@ -107,6 +107,7 @@ class ProjectsServices {
   async listProjects(userId, filters) {
     const { name } = filters
     const projects = connection('projects')
+      .select('id', 'name')
       .where('userId', userId)
       .where(query => {
         if (name) {
@@ -130,16 +131,15 @@ class ProjectsServices {
 
     const trx = await connection.transaction()
 
-    if (name) {
-      await trx('projects')
-        .where({
-          id: projectId,
-          userId,
-        })
-        .update({
-          name,
-        })
-    }
+    await trx('projects')
+      .where({
+        id: projectId,
+        userId,
+      })
+      .update({
+        name,
+      })
+
     await trx('navers_projects').where('projectId', projectId).del()
 
     if (!navers || !navers.length) {
